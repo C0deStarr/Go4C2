@@ -3,6 +3,7 @@ package main
 import (
 	"Go4C2/grpcapi"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -27,15 +28,23 @@ func NewBeaconServer(_chanCmd, _chanResult chan *grpcapi.Command) *BeaconServer 
 
 func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
 	log.Printf("FetchCommand()")
-
-	cmd := <-beaconServer.m_chanCmd
+	cmd := new(grpcapi.Command)
+	select {
+	case cmd, ok := <-beaconServer.m_chanCmd:
+		if ok {
+			return cmd, nil
+		}
+		return cmd, errors.New("channel cmd closed")
+	default:
+		// no jobs
+		return cmd, nil
+	}
 
 	log.Printf("cmd sent: %s", cmd.In)
 	return cmd, nil
 }
 func (beaconServer *BeaconServer) SendResult(context context.Context, cmdResult *grpcapi.Command) (*grpcapi.Empty, error) {
 	log.Printf("SendResult()")
-	log.Printf(cmdResult.Out)
 	beaconServer.m_chanResult <- cmdResult
 	return &grpcapi.Empty{}, nil
 }
@@ -58,7 +67,9 @@ func (adminServer *AdminServer) SendCommand(ctx context.Context, cmd *grpcapi.Co
 	log.Printf("SendCommand()")
 	var res *grpcapi.Command
 	go func() {
+		log.Printf("wait for cmd")
 		adminServer.m_chanCmd <- cmd
+		log.Printf("cmd sent")
 	}()
 	res = <-adminServer.m_chanResult
 	return res, nil

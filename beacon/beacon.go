@@ -7,6 +7,7 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -46,6 +47,8 @@ func main() {
 		if "" == grpcCmd.In {
 			// no work
 			log.Print("no work")
+			time.Sleep(3 * time.Second)
+			continue
 		} else if "q" == grpcCmd.In {
 			break
 		}
