@@ -24,8 +24,10 @@ func NewBeaconServer(_chanCmd chan *grpcapi.Command) *BeaconServer {
 }
 
 func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
-	cmd := new(grpcapi.Command)
-	cmd.In = "whoami"
+	//cmd := new(grpcapi.Command)
+
+	cmd := <-beaconServer.m_chanCmd
+
 	log.Printf("cmd sent: %s", cmd.In)
 	return cmd, nil
 }
@@ -89,7 +91,9 @@ func main() {
 	}
 
 	// 1.3 run beacon server
-	grpcBeaconServer.Serve(beaconListener)
+	go func() {
+		grpcBeaconServer.Serve(beaconListener)
+	}()
 
 	// 2. Admin server
 	// 2.1 register admin server
