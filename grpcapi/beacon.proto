@@ -2,10 +2,10 @@ syntax = "proto3";
 package grpcapi;    // like namespace
 option go_package = "../grpcapi"; // generate to --go_out
 
-// Implant defines our C2 API functions
+// beacon defines our C2 API functions
 // https://developers.google.cn/protocol-buffers/docs/proto3#services
 // https://developers.google.cn/protocol-buffers/docs/gotutorial#defining-your-protocol-format
-service Implant {
+service beacon {
     rpc FetchCommand (Empty) returns (Command);
     rpc SendOutput (Command) returns (Empty);
 }
@@ -22,7 +22,7 @@ message Command {
     string Out = 2;
 }
 
-// Empty defines an empty message used in place of null
+// placeholder
 // because null is not allowed to be passed in protobuf
 message Empty {
 }
