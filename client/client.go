@@ -27,15 +27,18 @@ func main() {
 	if nil != err {
 		log.Fatalf("grpc.Dial error: %v", err)
 	}
+	log.Printf("Dial() ok")
 
 	// 2. init client
 	adminClient = grpcapi.NewAdminClient(conn)
+	log.Printf("NewAdminClient() ok")
 
 	// 3. send grpcCmd
 	grpcCmd := new(grpcapi.Command)
 	grpcCmd.In = "whoami"
 	var cmdResult *grpcapi.Command
 	ctx := context.Background()
+	log.Printf("SendCommand()")
 	cmdResult, err = adminClient.SendCommand(ctx, grpcCmd)
 	if err != nil {
 		log.Fatal(err)

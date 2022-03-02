@@ -26,6 +26,7 @@ func NewBeaconServer(_chanCmd, _chanResult chan *grpcapi.Command) *BeaconServer 
 }
 
 func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
+	log.Printf("FetchCommand()")
 
 	cmd := <-beaconServer.m_chanCmd
 
@@ -33,7 +34,7 @@ func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *g
 	return cmd, nil
 }
 func (beaconServer *BeaconServer) SendResult(context context.Context, cmdResult *grpcapi.Command) (*grpcapi.Empty, error) {
-	log.Printf("recv result:")
+	log.Printf("SendResult()")
 	log.Printf(cmdResult.Out)
 	beaconServer.m_chanResult <- cmdResult
 	return &grpcapi.Empty{}, nil
@@ -54,11 +55,12 @@ func NewAdminServer(_chanCmd, _chanResult chan *grpcapi.Command) *AdminServer {
 	return newAdminServer
 }
 func (adminServer *AdminServer) SendCommand(ctx context.Context, cmd *grpcapi.Command) (*grpcapi.Command, error) {
+	log.Printf("SendCommand()")
 	var res *grpcapi.Command
-	log.Printf("send command:")
-	adminServer.m_chanCmd <- cmd
+	go func() {
+		adminServer.m_chanCmd <- cmd
+	}()
 	res = <-adminServer.m_chanResult
-	log.Printf("recv results:")
 	return res, nil
 }
 
