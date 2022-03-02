@@ -133,7 +133,7 @@ var file_beacon_proto_rawDesc = []byte{
 	0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x0e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70,
 	0x69, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70,
 	0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x2e, 0x0a, 0x0a, 0x53, 0x65, 0x6e,
-	0x64, 0x4f, 0x75, 0x74, 0x70, 0x75, 0x74, 0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70,
+	0x64, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70,
 	0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x1a, 0x0e, 0x2e, 0x67, 0x72, 0x70, 0x63,
 	0x61, 0x70, 0x69, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x39, 0x0a, 0x05, 0x41, 0x64, 0x6d,
 	0x69, 0x6e, 0x12, 0x30, 0x0a, 0x0a, 0x52, 0x75, 0x6e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
@@ -162,10 +162,10 @@ var file_beacon_proto_goTypes = []interface{}{
 }
 var file_beacon_proto_depIdxs = []int32{
 	1, // 0: grpcapi.beacon.FetchCommand:input_type -> grpcapi.Empty
-	0, // 1: grpcapi.beacon.SendOutput:input_type -> grpcapi.Command
+	0, // 1: grpcapi.beacon.SendResult:input_type -> grpcapi.Command
 	0, // 2: grpcapi.Admin.RunCommand:input_type -> grpcapi.Command
 	0, // 3: grpcapi.beacon.FetchCommand:output_type -> grpcapi.Command
-	1, // 4: grpcapi.beacon.SendOutput:output_type -> grpcapi.Empty
+	1, // 4: grpcapi.beacon.SendResult:output_type -> grpcapi.Empty
 	0, // 5: grpcapi.Admin.RunCommand:output_type -> grpcapi.Command
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
@@ -238,7 +238,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type BeaconClient interface {
 	FetchCommand(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Command, error)
-	SendOutput(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Empty, error)
+	SendResult(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type beaconClient struct {
@@ -258,9 +258,9 @@ func (c *beaconClient) FetchCommand(ctx context.Context, in *Empty, opts ...grpc
 	return out, nil
 }
 
-func (c *beaconClient) SendOutput(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Empty, error) {
+func (c *beaconClient) SendResult(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/grpcapi.beacon/SendOutput", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpcapi.beacon/SendResult", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func (c *beaconClient) SendOutput(ctx context.Context, in *Command, opts ...grpc
 // BeaconServer is the server API for Beacon service.
 type BeaconServer interface {
 	FetchCommand(context.Context, *Empty) (*Command, error)
-	SendOutput(context.Context, *Command) (*Empty, error)
+	SendResult(context.Context, *Command) (*Empty, error)
 }
 
 // UnimplementedBeaconServer can be embedded to have forward compatible implementations.
@@ -280,8 +280,8 @@ type UnimplementedBeaconServer struct {
 func (*UnimplementedBeaconServer) FetchCommand(context.Context, *Empty) (*Command, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchCommand not implemented")
 }
-func (*UnimplementedBeaconServer) SendOutput(context.Context, *Command) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendOutput not implemented")
+func (*UnimplementedBeaconServer) SendResult(context.Context, *Command) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendResult not implemented")
 }
 
 func RegisterBeaconServer(s *grpc.Server, srv BeaconServer) {
@@ -306,20 +306,20 @@ func _Beacon_FetchCommand_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Beacon_SendOutput_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Beacon_SendResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BeaconServer).SendOutput(ctx, in)
+		return srv.(BeaconServer).SendResult(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpcapi.beacon/SendOutput",
+		FullMethod: "/grpcapi.beacon/SendResult",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BeaconServer).SendOutput(ctx, req.(*Command))
+		return srv.(BeaconServer).SendResult(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -333,8 +333,8 @@ var _Beacon_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Beacon_FetchCommand_Handler,
 		},
 		{
-			MethodName: "SendOutput",
-			Handler:    _Beacon_SendOutput_Handler,
+			MethodName: "SendResult",
+			Handler:    _Beacon_SendResult_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

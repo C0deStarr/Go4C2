@@ -10,21 +10,23 @@ import (
 	"google.golang.org/grpc"
 )
 
-type beaconServer struct {
+type BeaconServer struct {
 }
 
-func NewbeaconServer() *beaconServer {
-	newbeaconServer := new(beaconServer)
+func NewBeaconServer() *BeaconServer {
+	newbeaconServer := new(BeaconServer)
 	return newbeaconServer
 }
 
-func (beaconServer *beaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
+func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
 	cmd := new(grpcapi.Command)
-	cmd.In = "ipconfig /all"
-	log.Printf("recv cmd from server")
+	cmd.In = "whoami"
+	log.Printf("cmd sent: %s", cmd.In)
 	return cmd, nil
 }
-func (beaconServer *beaconServer) SendOutput(context context.Context, empty *grpcapi.Command) (*grpcapi.Empty, error) {
+func (beaconServer *BeaconServer) SendResult(context context.Context, cmdResult *grpcapi.Command) (*grpcapi.Empty, error) {
+	log.Printf("recv result:")
+	log.Printf(cmdResult.Out)
 	return &grpcapi.Empty{}, nil
 }
 
@@ -33,14 +35,18 @@ var (
 )
 
 func main() {
-	var ()
+	var (
+		beaconServer     *BeaconServer
+		grpcbeaconServer *grpc.Server
+	)
 
-	// register beacon server
-	beaconServer := NewbeaconServer()
-	grpcbeaconServer := grpc.NewServer()
+	// 1. Beacon server
+	// 1.1 register beacon server
+	beaconServer = NewBeaconServer()
+	grpcbeaconServer = grpc.NewServer()
 	grpcapi.RegisterBeaconServer(grpcbeaconServer, beaconServer)
 
-	// listen
+	// 1.2 listen
 	strbeaconAddr := fmt.Sprintf("localhost:%d", g_nbeaconPort)
 	beaconListener, err := net.Listen("tcp", strbeaconAddr)
 	if nil != err {

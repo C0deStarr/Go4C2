@@ -7,7 +7,7 @@ option go_package = "../grpcapi"; // generate to --go_out
 // https://developers.google.cn/protocol-buffers/docs/gotutorial#defining-your-protocol-format
 service beacon {
     rpc FetchCommand (Empty) returns (Command);
-    rpc SendOutput (Command) returns (Empty);
+    rpc SendResult (Command) returns (Empty);
 }
 
 // Admin defines our Admin API functions
