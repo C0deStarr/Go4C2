@@ -1,0 +1,28 @@
+syntax = "proto3";
+package grpcapi;    // like namespace
+option go_package = "../grpcapi"; // generate to --go_out
+
+// Implant defines our C2 API functions
+// https://developers.google.cn/protocol-buffers/docs/proto3#services
+// https://developers.google.cn/protocol-buffers/docs/gotutorial#defining-your-protocol-format
+service Implant {
+    rpc FetchCommand (Empty) returns (Command);
+    rpc SendOutput (Command) returns (Empty);
+}
+
+// Admin defines our Admin API functions
+service Admin {
+    rpc RunCommand (Command) returns (Command);
+}
+
+// https://developers.google.cn/protocol-buffers/docs/reference/proto3-spec#message_definition
+// Command defines a with both input and output fields
+message Command {
+    string In = 1;
+    string Out = 2;
+}
+
+// Empty defines an empty message used in place of null
+// because null is not allowed to be passed in protobuf
+message Empty {
+}
