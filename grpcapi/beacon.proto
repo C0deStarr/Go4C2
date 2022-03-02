@@ -12,7 +12,7 @@ service beacon {
 
 // Admin defines our Admin API functions
 service Admin {
-    rpc RunCommand (Command) returns (Command);
+    rpc SendCommand (Command) returns (Command);
 }
 
 // https://developers.google.cn/protocol-buffers/docs/reference/proto3-spec#message_definition

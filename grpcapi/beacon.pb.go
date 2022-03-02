@@ -135,12 +135,12 @@ var file_beacon_proto_rawDesc = []byte{
 	0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x2e, 0x0a, 0x0a, 0x53, 0x65, 0x6e,
 	0x64, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70,
 	0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x1a, 0x0e, 0x2e, 0x67, 0x72, 0x70, 0x63,
-	0x61, 0x70, 0x69, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x39, 0x0a, 0x05, 0x41, 0x64, 0x6d,
-	0x69, 0x6e, 0x12, 0x30, 0x0a, 0x0a, 0x52, 0x75, 0x6e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
-	0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61,
-	0x6e, 0x64, 0x1a, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6d,
-	0x6d, 0x61, 0x6e, 0x64, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2e, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x61,
-	0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x70, 0x69, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x3a, 0x0a, 0x05, 0x41, 0x64, 0x6d,
+	0x69, 0x6e, 0x12, 0x31, 0x0a, 0x0b, 0x53, 0x65, 0x6e, 0x64, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e,
+	0x64, 0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d,
+	0x61, 0x6e, 0x64, 0x1a, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f,
+	0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2e, 0x2f, 0x67, 0x72, 0x70, 0x63,
+	0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -163,10 +163,10 @@ var file_beacon_proto_goTypes = []interface{}{
 var file_beacon_proto_depIdxs = []int32{
 	1, // 0: grpcapi.beacon.FetchCommand:input_type -> grpcapi.Empty
 	0, // 1: grpcapi.beacon.SendResult:input_type -> grpcapi.Command
-	0, // 2: grpcapi.Admin.RunCommand:input_type -> grpcapi.Command
+	0, // 2: grpcapi.Admin.SendCommand:input_type -> grpcapi.Command
 	0, // 3: grpcapi.beacon.FetchCommand:output_type -> grpcapi.Command
 	1, // 4: grpcapi.beacon.SendResult:output_type -> grpcapi.Empty
-	0, // 5: grpcapi.Admin.RunCommand:output_type -> grpcapi.Command
+	0, // 5: grpcapi.Admin.SendCommand:output_type -> grpcapi.Command
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -345,7 +345,7 @@ var _Beacon_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AdminClient interface {
-	RunCommand(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Command, error)
+	SendCommand(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Command, error)
 }
 
 type adminClient struct {
@@ -356,9 +356,9 @@ func NewAdminClient(cc grpc.ClientConnInterface) AdminClient {
 	return &adminClient{cc}
 }
 
-func (c *adminClient) RunCommand(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Command, error) {
+func (c *adminClient) SendCommand(ctx context.Context, in *Command, opts ...grpc.CallOption) (*Command, error) {
 	out := new(Command)
-	err := c.cc.Invoke(ctx, "/grpcapi.Admin/RunCommand", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpcapi.Admin/SendCommand", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -367,35 +367,35 @@ func (c *adminClient) RunCommand(ctx context.Context, in *Command, opts ...grpc.
 
 // AdminServer is the server API for Admin service.
 type AdminServer interface {
-	RunCommand(context.Context, *Command) (*Command, error)
+	SendCommand(context.Context, *Command) (*Command, error)
 }
 
 // UnimplementedAdminServer can be embedded to have forward compatible implementations.
 type UnimplementedAdminServer struct {
 }
 
-func (*UnimplementedAdminServer) RunCommand(context.Context, *Command) (*Command, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RunCommand not implemented")
+func (*UnimplementedAdminServer) SendCommand(context.Context, *Command) (*Command, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendCommand not implemented")
 }
 
 func RegisterAdminServer(s *grpc.Server, srv AdminServer) {
 	s.RegisterService(&_Admin_serviceDesc, srv)
 }
 
-func _Admin_RunCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Admin_SendCommand_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Command)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServer).RunCommand(ctx, in)
+		return srv.(AdminServer).SendCommand(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpcapi.Admin/RunCommand",
+		FullMethod: "/grpcapi.Admin/SendCommand",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServer).RunCommand(ctx, req.(*Command))
+		return srv.(AdminServer).SendCommand(ctx, req.(*Command))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -405,8 +405,8 @@ var _Admin_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*AdminServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "RunCommand",
-			Handler:    _Admin_RunCommand_Handler,
+			MethodName: "SendCommand",
+			Handler:    _Admin_SendCommand_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
