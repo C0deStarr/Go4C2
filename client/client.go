@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -20,7 +21,9 @@ func main() {
 		err         error
 		adminClient grpcapi.AdminClient
 	)
-
+	if len(os.Args) <= 1 {
+		log.Fatalf("usage:%s CMD [arg arg ...] ", os.Args[0])
+	}
 	// 1. connect to the team server
 	server := fmt.Sprintf("%s:%d", g_strTeamServer, g_nAdminServerPort)
 	conn, err = grpc.Dial(server, grpc.WithInsecure())
@@ -35,7 +38,7 @@ func main() {
 
 	// 3. send grpcCmd
 	grpcCmd := new(grpcapi.Command)
-	grpcCmd.In = "whoami"
+	grpcCmd.In = os.Args[1]
 	var cmdResult *grpcapi.Command
 	ctx := context.Background()
 	log.Printf("SendCommand()")
