@@ -96,5 +96,10 @@ Only one cmd could be executed per process for now：
 # 3. Known issues
 
 * Encoding troubles；
-
 * If the results is too long，such as "ipconfig /all"，SendResult() will fail；
+
+Something need improving:
+
+* TLS
+* Connection error
+* Persistence

@@ -95,3 +95,9 @@ go run .\client.go -server localhost -port 4444 -cmd "whoami"
 
 * 如果执行结果太长，比如ipconfig /all，返回结果（SendResult）会失败；
 
+待完善：
+
+* 流量加密
+* 处理连接异常
+* 持久化
+
