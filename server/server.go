@@ -4,9 +4,11 @@ import (
 	"Go4C2/grpcapi"
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -71,14 +73,11 @@ func (adminServer *AdminServer) SendCommand(ctx context.Context, cmd *grpcapi.Co
 		adminServer.m_chanCmd <- cmd
 		log.Printf("cmd sent")
 	}()
+	log.Printf("wait for result")
 	res = <-adminServer.m_chanResult
+	log.Printf("result sent")
 	return res, nil
 }
-
-var (
-	g_nBeaconPort = 4444
-	g_nAdminPort  = 5555
-)
 
 func main() {
 	var (
@@ -94,8 +93,18 @@ func main() {
 		chanResult chan *grpcapi.Command
 
 		err error
-	)
 
+		strFlagServer   string
+		nFlagBeaconPort uint
+		nFlagClientPort uint
+	)
+	flag.StringVar(&strFlagServer, "server", "", "team server ip")
+	flag.UintVar(&nFlagBeaconPort, "beaconport", 0, "team server port for beacon")
+	flag.UintVar(&nFlagClientPort, "clientport", 0, "team server port for client")
+	flag.Parse()
+	if len(os.Args) <= 1 {
+		log.Fatalf("-h to see usage")
+	}
 	// 0. init channel
 	chanCmd = make(chan *grpcapi.Command)    // no buffer to block the client input goroutine
 	chanResult = make(chan *grpcapi.Command) // no buffer to block the client input goroutine
@@ -107,7 +116,7 @@ func main() {
 	grpcapi.RegisterBeaconServer(grpcBeaconServer, beaconServer)
 
 	// 1.2 listen
-	strBeaconAddr := fmt.Sprintf("localhost:%d", g_nBeaconPort)
+	strBeaconAddr := fmt.Sprintf("%s:%d", strFlagServer, nFlagBeaconPort)
 	beaconListener, err = net.Listen("tcp", strBeaconAddr)
 	if nil != err {
 		log.Fatal(err)
@@ -125,7 +134,7 @@ func main() {
 	grpcapi.RegisterAdminServer(grpcAdminServer, adminServer)
 
 	// 2.2 listen
-	strAdminAddr := fmt.Sprintf("localhost:%d", g_nAdminPort)
+	strAdminAddr := fmt.Sprintf("%s:%d", strFlagServer, nFlagClientPort)
 	adminListener, err = net.Listen("tcp", strAdminAddr)
 	if nil != err {
 		log.Fatal(err)

